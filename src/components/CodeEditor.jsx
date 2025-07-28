@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
 import Editor from "@monaco-editor/react";
+import { Link } from "react-router-dom";
 
 const DEFAULT_CODE = `<html>
   <head><title>Hello</title></head>
@@ -39,7 +40,12 @@ const CodeEditor = () => {
 
   return (
     <Container className="py-4">
-      <h2 className="text-center mb-4">NoteCode - Code Sharing App</h2>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h2 className="mb-0">NoteCode - Code Sharing App</h2>
+        <Link to="/explore">
+          <Button variant="outline-primary">🔍 Explore Snippets</Button>
+        </Link>
+      </div>
 
       <Row className="mb-3">
         <Col md={4} className="mb-2">
