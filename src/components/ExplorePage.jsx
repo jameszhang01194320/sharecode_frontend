@@ -16,6 +16,17 @@ const ExplorePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // 恢复滚动位置
+  useEffect(() => {
+    if (location.state?.scrollY !== undefined) {
+        // 延迟以确保 DOM 渲染完成再滚动
+        setTimeout(() => {
+        window.scrollTo({ top: location.state.scrollY, behavior: "instant" });
+        }, 0);
+    }
+    }, [location.state]);
+
+
   useEffect(() => {
     fetch(`${BACKEND_URL}/api/snippets/`)
       .then((res) => res.json())
@@ -29,9 +40,7 @@ const ExplorePage = () => {
   const handleToggleFavorite = async (snippet) => {
     const res = await fetch(`${BACKEND_URL}/api/snippets/${snippet.id}/`, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ is_favorite: !snippet.is_favorite }),
     });
 
@@ -45,7 +54,12 @@ const ExplorePage = () => {
   };
 
   const handleView = (snippetId) => {
-    navigate(`/share/${snippetId}`, { state: { from: location.pathname } });
+    navigate(`/share/${snippetId}`, {
+      state: {
+        from: "/explore",
+        scrollY: window.scrollY,
+      },
+    });
   };
 
   return (
@@ -72,7 +86,7 @@ const ExplorePage = () => {
           {filteredSnippets.map((snippet) => (
             <tr key={snippet.id}>
               <td>
-                {snippet.language.toUpperCase()} {" "}
+                {snippet.language.toUpperCase()}{" "}
                 {snippet.is_favorite && <Badge bg="warning">★ 收藏</Badge>}
               </td>
               <td>
@@ -101,12 +115,6 @@ const ExplorePage = () => {
           ))}
         </tbody>
       </Table>
-
-      <div className="text-center mt-3">
-        <Link to="/explore">
-          <Button variant="outline-secondary">🔙 返回列表</Button>
-        </Link>
-      </div>
     </Container>
   );
 };
