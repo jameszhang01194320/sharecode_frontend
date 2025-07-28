@@ -1,8 +1,8 @@
 // src/components/ExplorePage.jsx
 
 import React, { useEffect, useState } from "react";
-import { Container, Row, Col, Button, Card, Badge } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Container, Button, Badge, Table } from "react-bootstrap";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 const ExplorePage = () => {
   const [snippets, setSnippets] = useState([]);
@@ -13,6 +13,9 @@ const ExplorePage = () => {
       ? "http://127.0.0.1:8000"
       : "https://sharecode-backend-vrjn.onrender.com";
 
+  const navigate = useNavigate();
+  const location = useLocation();
+
   useEffect(() => {
     fetch(`${BACKEND_URL}/api/snippets/`)
       .then((res) => res.json())
@@ -22,6 +25,28 @@ const ExplorePage = () => {
   const filteredSnippets = showFavorites
     ? snippets.filter((s) => s.is_favorite)
     : snippets;
+
+  const handleToggleFavorite = async (snippet) => {
+    const res = await fetch(`${BACKEND_URL}/api/snippets/${snippet.id}/`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ is_favorite: !snippet.is_favorite }),
+    });
+
+    if (res.ok) {
+      setSnippets((prev) =>
+        prev.map((s) =>
+          s.id === snippet.id ? { ...s, is_favorite: !s.is_favorite } : s
+        )
+      );
+    }
+  };
+
+  const handleView = (snippetId) => {
+    navigate(`/share/${snippetId}`, { state: { from: location.pathname } });
+  };
 
   return (
     <Container className="py-4">
@@ -34,29 +59,54 @@ const ExplorePage = () => {
           {showFavorites ? "✅ 显示全部" : "🌟 只看收藏"}
         </Button>
       </div>
-      <Row>
-        {filteredSnippets.map((snippet) => (
-          <Col md={6} lg={4} className="mb-4" key={snippet.id}>
-            <Card>
-              <Card.Body>
-                <Card.Title>
-                  {snippet.language.toUpperCase()}{" "}
-                  {snippet.is_favorite && <Badge bg="warning">★ 收藏</Badge>}
-                </Card.Title>
-                <Card.Text style={{ whiteSpace: "pre-wrap" }}>
-                  {snippet.code.substring(0, 100)}...
-                </Card.Text>
-                <Link
-                  to={`/share/${snippet.id}`}
-                  className="btn btn-sm btn-primary me-2"
+
+      <Table striped bordered hover responsive>
+        <thead>
+          <tr>
+            <th>语言</th>
+            <th>预览</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredSnippets.map((snippet) => (
+            <tr key={snippet.id}>
+              <td>
+                {snippet.language.toUpperCase()} {" "}
+                {snippet.is_favorite && <Badge bg="warning">★ 收藏</Badge>}
+              </td>
+              <td>
+                <code style={{ whiteSpace: "pre-wrap" }}>
+                  {snippet.code.substring(0, 80)}...
+                </code>
+              </td>
+              <td>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => handleView(snippet.id)}
                 >
                   查看
-                </Link>
-              </Card.Body>
-            </Card>
-          </Col>
-        ))}
-      </Row>
+                </Button>
+                <Button
+                  variant={snippet.is_favorite ? "danger" : "outline-warning"}
+                  size="sm"
+                  onClick={() => handleToggleFavorite(snippet)}
+                >
+                  {snippet.is_favorite ? "取消收藏" : "🌟 收藏"}
+                </Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+
+      <div className="text-center mt-3">
+        <Link to="/explore">
+          <Button variant="outline-secondary">🔙 返回列表</Button>
+        </Link>
+      </div>
     </Container>
   );
 };
