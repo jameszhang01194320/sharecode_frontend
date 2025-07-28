@@ -17,7 +17,12 @@ const CodeEditor = () => {
   const [copied, setCopied] = useState(false);
 
   const handleShare = async () => {
-    const response = await fetch("http://127.0.0.1:8000/api/snippets/", {
+    const BACKEND_URL =
+      process.env.NODE_ENV === "development"
+        ? "http://127.0.0.1:8000"
+        : "https://sharecode-backend-vrjn.onrender.com";
+
+    const response = await fetch(`${BACKEND_URL}/api/snippets/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

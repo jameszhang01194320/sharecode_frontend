@@ -8,28 +8,16 @@ const ExplorePage = () => {
   const [snippets, setSnippets] = useState([]);
   const [showFavorites, setShowFavorites] = useState(false);
 
+  const BACKEND_URL =
+    process.env.NODE_ENV === "development"
+      ? "http://127.0.0.1:8000"
+      : "https://sharecode-backend-vrjn.onrender.com";
+
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/snippets/")
+    fetch(`${BACKEND_URL}/api/snippets/`)
       .then((res) => res.json())
       .then((data) => setSnippets(data));
   }, []);
-
-  const handleToggleFavorite = async (id, currentStatus) => {
-    const response = await fetch(`http://127.0.0.1:8000/api/snippets/${id}/`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ is_favorite: !currentStatus }),
-    });
-
-    if (response.ok) {
-      const updated = await response.json();
-      setSnippets((prev) =>
-        prev.map((s) => (s.id === id ? { ...s, is_favorite: updated.is_favorite } : s))
-      );
-    }
-  };
 
   const filteredSnippets = showFavorites
     ? snippets.filter((s) => s.is_favorite)
@@ -52,7 +40,7 @@ const ExplorePage = () => {
             <Card>
               <Card.Body>
                 <Card.Title>
-                  {snippet.language.toUpperCase()} {" "}
+                  {snippet.language.toUpperCase()}{" "}
                   {snippet.is_favorite && <Badge bg="warning">★ 收藏</Badge>}
                 </Card.Title>
                 <Card.Text style={{ whiteSpace: "pre-wrap" }}>
@@ -64,13 +52,6 @@ const ExplorePage = () => {
                 >
                   查看
                 </Link>
-                <Button
-                  variant={snippet.is_favorite ? "warning" : "outline-warning"}
-                  size="sm"
-                  onClick={() => handleToggleFavorite(snippet.id, snippet.is_favorite)}
-                >
-                  {snippet.is_favorite ? "取消收藏" : "收藏"}
-                </Button>
               </Card.Body>
             </Card>
           </Col>
