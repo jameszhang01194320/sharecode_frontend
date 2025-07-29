@@ -1,5 +1,4 @@
 // src/components/ExplorePage.jsx
-
 import React, { useEffect, useState } from "react";
 import { Container, Button, Badge, Table } from "react-bootstrap";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -16,16 +15,14 @@ const ExplorePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // 恢复滚动位置
+  // Restore scroll position
   useEffect(() => {
     if (location.state?.scrollY !== undefined) {
-        // 延迟以确保 DOM 渲染完成再滚动
-        setTimeout(() => {
+      setTimeout(() => {
         window.scrollTo({ top: location.state.scrollY, behavior: "instant" });
-        }, 0);
+      }, 0);
     }
-    }, [location.state]);
-
+  }, [location.state]);
 
   useEffect(() => {
     fetch(`${BACKEND_URL}/api/snippets/`)
@@ -53,6 +50,20 @@ const ExplorePage = () => {
     }
   };
 
+  const handleDelete = async (snippetId) => {
+    if (!window.confirm("Are you sure you want to delete this snippet?")) return;
+
+    const res = await fetch(`${BACKEND_URL}/api/snippets/${snippetId}/`, {
+      method: "DELETE",
+    });
+
+    if (res.ok) {
+      setSnippets((prev) => prev.filter((s) => s.id !== snippetId));
+    } else {
+      alert("Failed to delete snippet.");
+    }
+  };
+
   const handleView = (snippetId) => {
     navigate(`/share/${snippetId}`, {
       state: {
@@ -64,22 +75,28 @@ const ExplorePage = () => {
 
   return (
     <Container className="py-4">
-      <h2 className="text-center mb-4">Explore Snippets</h2>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2>Explore Snippets</h2>
+        <Link to="/" className="btn btn-secondary">
+          ⬅ Back to Home
+        </Link>
+      </div>
+
       <div className="text-center mb-4">
         <Button
           variant={showFavorites ? "success" : "outline-success"}
           onClick={() => setShowFavorites((prev) => !prev)}
         >
-          {showFavorites ? "✅ 显示全部" : "🌟 只看收藏"}
+          {showFavorites ? "✅ Show All" : "🌟 Show Favorites Only"}
         </Button>
       </div>
 
       <Table striped bordered hover responsive>
         <thead>
           <tr>
-            <th>语言</th>
-            <th>预览</th>
-            <th>操作</th>
+            <th>Language</th>
+            <th>Preview</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -87,7 +104,7 @@ const ExplorePage = () => {
             <tr key={snippet.id}>
               <td>
                 {snippet.language.toUpperCase()}{" "}
-                {snippet.is_favorite && <Badge bg="warning">★ 收藏</Badge>}
+                {snippet.is_favorite && <Badge bg="warning">★ Favorite</Badge>}
               </td>
               <td>
                 <code style={{ whiteSpace: "pre-wrap" }}>
@@ -101,14 +118,22 @@ const ExplorePage = () => {
                   className="me-2"
                   onClick={() => handleView(snippet.id)}
                 >
-                  查看
+                  View
                 </Button>
                 <Button
                   variant={snippet.is_favorite ? "danger" : "outline-warning"}
                   size="sm"
+                  className="me-2"
                   onClick={() => handleToggleFavorite(snippet)}
                 >
-                  {snippet.is_favorite ? "取消收藏" : "🌟 收藏"}
+                  {snippet.is_favorite ? "Unfavorite" : "🌟 Favorite"}
+                </Button>
+                <Button
+                  variant="outline-danger"
+                  size="sm"
+                  onClick={() => handleDelete(snippet.id)}
+                >
+                  🗑 Delete
                 </Button>
               </td>
             </tr>

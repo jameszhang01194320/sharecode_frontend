@@ -1,15 +1,12 @@
 // src/components/SharedSnippet.jsx
-
 import React, { useEffect, useState } from "react";
-import { Container, Button, Spinner } from "react-bootstrap";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import Editor from "@monaco-editor/react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { Container, Button, Badge } from "react-bootstrap";
 
-const SharedSnippet = () => {
+function SharedSnippet() {
   const { id } = useParams();
   const [snippet, setSnippet] = useState(null);
   const navigate = useNavigate();
-  const location = useLocation();
 
   const BACKEND_URL =
     process.env.NODE_ENV === "development"
@@ -22,52 +19,34 @@ const SharedSnippet = () => {
       .then((data) => setSnippet(data));
   }, [id]);
 
-  const handleGoBack = () => {
-    if (location.state?.from) {
-      navigate(location.state.from, {
-        state: {
-          scrollY: location.state.scrollY || 0,
-        },
-      });
-    } else {
-      navigate("/");
-    }
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    alert("Link copied to clipboard!");
   };
 
-  if (!snippet) {
-    return (
-      <Container className="py-5 text-center">
-        <Spinner animation="border" />
-      </Container>
-    );
-  }
+  if (!snippet) return <p>Loading...</p>;
 
   return (
     <Container className="py-4">
-      <h2 className="text-center mb-3">📄 查看代码片段</h2>
+      <h2>
+        {snippet.language?.toUpperCase()}{" "}
+        {snippet.is_favorite && <Badge bg="warning">★ Favorite</Badge>}
+      </h2>
+      <pre style={{ whiteSpace: "pre-wrap" }}>{snippet.code}</pre>
 
-      <div className="mb-3">
-        <strong>语言:</strong> {snippet.language} <br />
-        <strong>主题:</strong> {snippet.theme}
-      </div>
-
-      <div className="border rounded mb-4" style={{ overflow: "hidden" }}>
-        <Editor
-          height="400px"
-          defaultLanguage={snippet.language}
-          defaultTheme={snippet.theme}
-          value={snippet.code}
-          options={{ readOnly: true, minimap: { enabled: false } }}
-        />
-      </div>
-
-      <div className="text-center">
-        <Button variant="secondary" onClick={handleGoBack}>
-          🔙 返回上页
+      <div className="mt-3">
+        <Button variant="primary" className="me-2" onClick={handleCopyLink}>
+          📋 Copy Link
         </Button>
+        <Link to="/" className="btn btn-secondary me-2">
+          ⬅ Back to Home
+        </Link>
+        <Link to="/explore" className="btn btn-success">
+          🔍 Explore More
+        </Link>
       </div>
     </Container>
   );
-};
+}
 
 export default SharedSnippet;

@@ -88,11 +88,11 @@ const CodeEditor = () => {
       {sharedLink && (
         <>
           <Alert variant="success">
-            分享链接已生成：
+            The share link generated:
             <a href={sharedLink} target="_blank" rel="noreferrer">{sharedLink}</a>
           </Alert>
           <Button variant="outline-success" onClick={handleCopy}>
-            {copied ? "✅ 已复制链接" : "📋 复制链接"}
+            {copied ? "✅ Link copied" : "📋 Copy link"}
           </Button>
         </>
       )}
