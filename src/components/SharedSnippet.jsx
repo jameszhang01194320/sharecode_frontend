@@ -11,7 +11,7 @@ function SharedSnippet() {
   const BACKEND_URL =
     process.env.NODE_ENV === "development"
       ? "http://127.0.0.1:8000"
-      : "https://sharecode-backend-vrjn.onrender.com";
+      : "https://sharecode-backend-4wz6.onrender.com";
 
   useEffect(() => {
     fetch(`${BACKEND_URL}/api/snippets/${id}/`)
